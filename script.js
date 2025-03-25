@@ -92,22 +92,20 @@ Snack 6
 -Crea un contatore automatico con setInterval
 -Definisci una funzione creaContatoreAutomatico che accetta un intervallo di tempo e restituisce una funzione che avvia un setInterval, incrementando un contatore e stampandolo.*/
 
-function creaContatoreAutomatico(time, seconds){
+function creaContatoreAutomatico(time,){
   let count = 0;
-  const interval = setInterval(()=>{
+
+  /* non essendo definita la funzione setInterval all'interno di creaContatoreAutomatico ho bisogno poi successivamente di definire la funzione di creaContatore automatico per ogni intervallo di tempo per il quale la voglio utilizzare. Rivedere il concetto di CLOSURE*/
+  return () =>
+     setInterval(()=>{
+      count++;
     console.log(count);
-    count++;
-
-    if (count === seconds){
-      clearInterval(interval);
-      console.log(`${count} secondi, fermato il timer`);
-    }  
   }, time);
-  return interval;
 }
-// creaContatoreAutomatico(1000, 5);
+const contaOgniSecondo = creaContatoreAutomatico(1000);
+// contaOgniSecondo();
 
-/*
+/*  
 Snack 7
 -Crea una funzione che ferma un timer dopo un certo tempo
 -Scrivi una funzione eseguiEferma che accetta un messaggio, un tempo di avvio e un tempo di stop. Il messaggio deve essere stampato a intervalli regolari, ma si deve fermare dopo il tempo di stop.
@@ -124,8 +122,23 @@ function eseguiEferma(message, start, stop){
     }                 
   }, start);
 }
-
 // console.log(eseguiEferma('Ciao Mondo', 1000, 5));
+
+
+/* Alternativa*/
+
+function eseguiEferma2(message, interval, duration){
+  const intervalId = setInterval(() => {
+    console.log(message);
+  }, interval);
+
+  setTimeout(() => {
+    clearInterval(intervalId);
+    console.log('Timer scaduto');
+  }, duration); 
+}
+
+// eseguiEferma2('Ciao Mondo', 1000, 5000);
 
 
 /*
@@ -172,7 +185,48 @@ function sequenzaOperazioni(num1,num2,operations, time){
     }   
   }, time);
 }
-console.log(sequenzaOperazioni(10,5,operazioni, 1000));
+// console.log(sequenzaOperazioni(10,5,operazioni, 1000));
+
+/* Alternativa */
+
+function sequenzaOperazioni2(num1, num2, operations, time){
+   operations.forEach((operation, index) => {
+    setTimeout(() => {
+      console.log(operation(num1, num2));
+    }, time * index);
+
+  });
+}
+// console.log(sequenzaOperazioni2(10, 5, operazioni, 1000));
 
 
+/* Snack 10 (Bonus)
+-Creare un throttler per limitare l’esecuzione di una funzione
+-Scrivi una funzione creaThrottler che accetta una funzione e un tempo `limite`.
+
+-Restituisce una nuova funzione che, quando chiamata ripetutamente, esegue l'operazione originale al massimo una volta ogni n millisecondi.*/
+
+function creaThrottler(callback, limit){
+
+  let lastCall = 0;
+
+  return function(...args){
+    const now = Date.now(); //date.now() restituisce il numero di millisecondi trascorsi dal 1 gennaio 1970
+
+    if(now - lastCall >= limit){
+      //now - lastCall è il tempo trascorso tra l'ultima chiamata e l'attuale chiamata
+      callback(...args);
+      //callback(...args) esegue la funzione passata come argomento
+      lastCall = now;
+      //lastCall viene aggiornato con il tempo attuale
+    } else {
+      console.log('Non posso eseguire la funzione');
+    }
+  }
+}
+const throttledLog = creaThrottler(() => console.log("Eseguito!"), 2000);
+
+throttledLog(); // ✅ "Eseguito!"
+throttledLog(); // ❌ Ignorato (chiamato troppo presto)
+setTimeout(throttledLog, 2500); // ✅ "Eseguito!" (dopo 2.5 secondi)
 
